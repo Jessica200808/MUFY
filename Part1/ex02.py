@@ -1,1 +1,2 @@
-print("Marvin")
+text = "Marvin"
+print(text)
