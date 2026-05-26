@@ -1,6 +1,20 @@
 import streamlit as st
 import random
 from datetime import datetime
+from openai import OpenAI
+
+
+# ======================================
+# OPENAI API KEY
+# ======================================
+
+# Replace with your OpenAI API key
+# Get one from:
+# https://platform.openai.com/
+
+client = OpenAI(
+    api_key="YOUR_API_KEY_HERE"
+)
 
 
 # ======================================
@@ -20,8 +34,8 @@ st.set_page_config(
 st.title("🌟 My Life App")
 
 st.write(
-    "Write journals, track goals, "
-    "and stay motivated!"
+    "Journal your thoughts, complete goals, "
+    "and talk to AI for support."
 )
 
 
@@ -29,11 +43,11 @@ st.write(
 # SESSION STORAGE
 # ======================================
 
-# Create journal list if it doesn't exist
+# Save journals temporarily
 if "journals" not in st.session_state:
     st.session_state.journals = []
 
-# Create bucket list if it doesn't exist
+# Save goals temporarily
 if "goals" not in st.session_state:
     st.session_state.goals = []
 
@@ -44,27 +58,58 @@ if "goals" not in st.session_state:
 
 quotes = [
 
-    "You are amazing.",
+    "You are stronger than you think.",
 
-    "Keep going.",
-
-    "Small progress matters.",
+    "Keep going. You are improving.",
 
     "Believe in yourself.",
 
+    "Every day is a fresh start.",
+
     "You can do hard things.",
 
-    "Every day is a fresh start."
+    "Small progress still matters."
 ]
+
+
+# ======================================
+# AI FUNCTION
+# ======================================
+
+def ask_ai(user_message):
+
+    response = client.chat.completions.create(
+
+        model="gpt-4.1-mini",
+
+        messages=[
+
+            {
+                "role": "system",
+                "content": (
+                    "You are a kind and supportive AI friend. "
+                    "Help users feel motivated, calm, and supported."
+                )
+            },
+
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ]
+    )
+
+    return response.choices[0].message.content
 
 
 # ======================================
 # CREATE TABS
 # ======================================
 
-tab1, tab2 = st.tabs([
+tab1, tab2, tab3 = st.tabs([
     "📔 Journal",
-    "🎯 Bucket List"
+    "🎯 Bucket List",
+    "🤖 AI Support"
 ])
 
 
@@ -76,12 +121,10 @@ with tab1:
 
     st.header("Daily Journal")
 
-    # User writes journal
     journal_text = st.text_area(
         "Write about your day"
     )
 
-    # Mood dropdown
     mood = st.selectbox(
         "Choose your mood",
         [
@@ -92,7 +135,6 @@ with tab1:
         ]
     )
 
-    # Save journal button
     if st.button("Save Journal"):
 
         st.session_state.journals.append({
@@ -129,12 +171,10 @@ with tab2:
 
     st.header("Bucket List")
 
-    # Goal input
     goal = st.text_input(
         "Enter a new goal"
     )
 
-    # Add goal button
     if st.button("Add Goal"):
 
         st.session_state.goals.append({
@@ -158,7 +198,7 @@ with tab2:
             key=i
         )
 
-        # If goal completed
+        # If completed
         if checked and not item["completed"]:
 
             st.balloons()
@@ -171,3 +211,36 @@ with tab2:
 
         # Update status
         st.session_state.goals[i]["completed"] = checked
+
+
+# ======================================
+# AI SUPPORT TAB
+# ======================================
+
+with tab3:
+
+    st.header("Talk to AI")
+
+    st.write(
+        "Share your problems, stress, or feelings."
+    )
+
+    user_message = st.text_area(
+        "What would you like help with?"
+    )
+
+    if st.button("Ask AI"):
+
+        if user_message != "":
+
+            with st.spinner("AI is thinking..."):
+
+                ai_reply = ask_ai(user_message)
+
+            st.markdown("### 🤖 AI Reply")
+
+            st.write(ai_reply)
+
+        else:
+
+            st.warning("Please type something first.")
