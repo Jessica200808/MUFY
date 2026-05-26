@@ -1,147 +1,66 @@
-# ============================================
-# LIFE COMPANION APP (NO AI VERSION)
-# Python + Streamlit
-#
-# FEATURES:
-# 1. Journal
-# 2. Bucket List
-# 3. Positive Quotes
-#
-# ============================================
-# HOW TO RUN
-#
-# 1. Install Streamlit:
-#    pip install streamlit
-#
-# 2. Create this folder structure:
-#
-#    life_app/
-#    ├── app.py
-#    └── data/
-#         ├── journal.json
-#         └── bucket_list.json
-#
-# 3. Put [] inside BOTH json files
-#
-# 4. Run app:
-#    streamlit run app.py
-#
-# ============================================
-
-
-# ============================================
-# IMPORTS
-# ============================================
-
 import streamlit as st
-import json
 import random
 from datetime import datetime
 
 
-# ============================================
-# FILE PATHS
-# ============================================
-
-JOURNAL_FILE = "data/journal.json"
-
-BUCKET_FILE = "data/bucket_list.json"
-
-
-# ============================================
-# LOAD DATA FUNCTION
-# ============================================
-
-def load_data(file_path):
-    """
-    Load data from JSON file.
-    """
-
-    try:
-
-        with open(file_path, "r") as file:
-
-            return json.load(file)
-
-    except:
-
-        return []
-
-
-# ============================================
-# SAVE DATA FUNCTION
-# ============================================
-
-def save_data(file_path, data):
-    """
-    Save data into JSON file.
-    """
-
-    with open(file_path, "w") as file:
-
-        json.dump(data, file, indent=4)
-
-
-# ============================================
-# POSITIVE QUOTES FUNCTION
-# ============================================
-
-def get_positive_quote():
-    """
-    Return random motivational quote.
-    """
-
-    quotes = [
-
-        "You are stronger than you think.",
-
-        "Small progress is still progress.",
-
-        "Believe in yourself.",
-
-        "Every day is a fresh start.",
-
-        "Your future self will thank you.",
-
-        "You can do hard things.",
-
-        "Keep going. You are improving.",
-
-        "Success begins with consistency."
-    ]
-
-    return random.choice(quotes)
-
-
-# ============================================
-# STREAMLIT PAGE SETTINGS
-# ============================================
+# ======================================
+# PAGE SETTINGS
+# ======================================
 
 st.set_page_config(
-
-    page_title="Life Companion App",
-
-    page_icon="🌟",
-
-    layout="centered"
+    page_title="My Life App",
+    page_icon="🌟"
 )
 
 
-# ============================================
+# ======================================
 # APP TITLE
-# ============================================
+# ======================================
 
-st.title("🌟 Life Companion App")
+st.title("🌟 My Life App")
 
 st.write(
-    "Write your journal, track your goals, "
-    "and stay motivated."
+    "Write journals, track goals, "
+    "and stay motivated!"
 )
 
 
-# ============================================
+# ======================================
+# SESSION STORAGE
+# ======================================
+
+# Create journal list if it doesn't exist
+if "journals" not in st.session_state:
+    st.session_state.journals = []
+
+# Create bucket list if it doesn't exist
+if "goals" not in st.session_state:
+    st.session_state.goals = []
+
+
+# ======================================
+# POSITIVE QUOTES
+# ======================================
+
+quotes = [
+
+    "You are amazing.",
+
+    "Keep going.",
+
+    "Small progress matters.",
+
+    "Believe in yourself.",
+
+    "You can do hard things.",
+
+    "Every day is a fresh start."
+]
+
+
+# ======================================
 # CREATE TABS
-# ============================================
+# ======================================
 
 tab1, tab2 = st.tabs([
     "📔 Journal",
@@ -149,20 +68,20 @@ tab1, tab2 = st.tabs([
 ])
 
 
-# ====================================================
+# ======================================
 # JOURNAL TAB
-# ====================================================
+# ======================================
 
 with tab1:
 
     st.header("Daily Journal")
 
-    # Journal input
+    # User writes journal
     journal_text = st.text_area(
         "Write about your day"
     )
 
-    # Mood selection
+    # Mood dropdown
     mood = st.selectbox(
         "Choose your mood",
         [
@@ -173,14 +92,10 @@ with tab1:
         ]
     )
 
-    # Save button
+    # Save journal button
     if st.button("Save Journal"):
 
-        # Load old journal entries
-        journal_entries = load_data(JOURNAL_FILE)
-
-        # Add new journal entry
-        journal_entries.append({
+        st.session_state.journals.append({
 
             "date": str(datetime.now()),
 
@@ -189,22 +104,13 @@ with tab1:
             "text": journal_text
         })
 
-        # Save updated entries
-        save_data(JOURNAL_FILE, journal_entries)
-
-        st.success("Journal saved successfully!")
+        st.success("Journal saved!")
 
 
-    # ============================================
-    # SHOW PREVIOUS ENTRIES
-    # ============================================
-
+    # Show previous journals
     st.subheader("Previous Entries")
 
-    journal_entries = load_data(JOURNAL_FILE)
-
-    # Show newest entries first
-    for entry in reversed(journal_entries):
+    for entry in reversed(st.session_state.journals):
 
         st.markdown(f"### 📅 {entry['date']}")
 
@@ -215,72 +121,53 @@ with tab1:
         st.divider()
 
 
-# ====================================================
+# ======================================
 # BUCKET LIST TAB
-# ====================================================
+# ======================================
 
 with tab2:
 
     st.header("Bucket List")
 
     # Goal input
-    new_goal = st.text_input(
+    goal = st.text_input(
         "Enter a new goal"
     )
 
     # Add goal button
     if st.button("Add Goal"):
 
-        goals = load_data(BUCKET_FILE)
+        st.session_state.goals.append({
 
-        # Add new goal
-        goals.append({
-
-            "goal": new_goal,
+            "goal": goal,
 
             "completed": False
         })
 
-        # Save goals
-        save_data(BUCKET_FILE, goals)
-
         st.success("Goal added!")
 
 
-    # ============================================
-    # SHOW GOALS
-    # ============================================
-
+    # Show goals
     st.subheader("Your Goals")
 
-    goals = load_data(BUCKET_FILE)
+    for i, item in enumerate(st.session_state.goals):
 
-    # Loop through goals
-    for i, goal in enumerate(goals):
-
-        completed = st.checkbox(
-
-            goal["goal"],
-
-            value=goal["completed"],
-
+        checked = st.checkbox(
+            item["goal"],
+            value=item["completed"],
             key=i
         )
 
-        # If user completes goal
-        if completed and not goal["completed"]:
+        # If goal completed
+        if checked and not item["completed"]:
 
             st.balloons()
 
-            quote = get_positive_quote()
+            quote = random.choice(quotes)
 
             st.success(
                 f"🎉 Goal completed!\n\n✨ {quote}"
             )
 
-        # Update completed status
-        goals[i]["completed"] = completed
-
-
-    # Save updated goals
-    save_data(BUCKET_FILE, goals)
+        # Update status
+        st.session_state.goals[i]["completed"] = checked
