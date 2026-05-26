@@ -1,41 +1,78 @@
-# =====================================
-# SIMPLE JOURNAL & BUCKET LIST APP
-# Using Python + Streamlit
-# =====================================
+# =====================================================
+# CUTE JOURNAL & BUCKET LIST APP 🌸
+# Python + Streamlit
+# Beginner Friendly Version
+# =====================================================
 
 # Import libraries
 import streamlit as st
 import json
 import random
+from datetime import datetime
 
-# =====================================
+# =====================================================
+# PAGE SETTINGS
+# =====================================================
+
+st.set_page_config(
+    page_title="My Happy Space 🌸",
+    page_icon="🌸",
+    layout="centered"
+)
+
+# =====================================================
 # FILE NAMES
-# =====================================
+# =====================================================
 
 JOURNAL_FILE = "journals.json"
-BUCKET_FILE = "bucket_list.json"
+GOAL_FILE = "goals.json"
 
-# =====================================
-# POSITIVE QUOTES
-# =====================================
+# =====================================================
+# MOTIVATIONAL QUOTES
+# =====================================================
 
 quotes = [
-    "Great job! Keep going!",
-    "You are doing amazing!",
-    "One step at a time!",
-    "You can achieve your dreams!",
-    "Success starts with small progress.",
-    "Believe in yourself!"
+    "🌷 You are doing better than you think.",
+    "✨ Small progress is still progress.",
+    "💖 Your dreams matter.",
+    "🌈 Every day is a fresh start.",
+    "🦋 Believe in yourself.",
+    "🌸 You are growing beautifully.",
+    "☀️ Keep shining!",
+    "💪 You can do hard things.",
+    "🌟 One step at a time.",
+    "💕 Be proud of yourself."
 ]
 
-# =====================================
+# =====================================================
+# MOOD MESSAGES
+# =====================================================
+
+mood_messages = {
+    "😊 Happy":
+        "Keep spreading your happiness 🌞",
+
+    "😴 Tired":
+        "Rest is important too 💖",
+
+    "😢 Sad":
+        "Bad days don't last forever 🌈",
+
+    "😡 Angry":
+        "Take a deep breath 🌸",
+
+    "😰 Stressed":
+        "You are stronger than your stress 💪"
+}
+
+# =====================================================
 # HELPER FUNCTIONS
-# =====================================
+# =====================================================
 
 def load_data(filename):
     """
     Load data from JSON file.
-    If file does not exist, return empty list.
+    If file doesn't exist, return empty list.
     """
 
     try:
@@ -55,12 +92,18 @@ def save_data(filename, data):
         json.dump(data, file, indent=4)
 
 
-def add_journal(entry):
+def add_journal(text, mood):
     """
-    Add a journal entry.
+    Add journal entry into file.
     """
 
     journals = load_data(JOURNAL_FILE)
+
+    entry = {
+        "date": datetime.now().strftime("%d/%m/%Y %H:%M"),
+        "mood": mood,
+        "text": text
+    }
 
     journals.append(entry)
 
@@ -72,7 +115,7 @@ def add_goal(goal):
     Add a bucket list goal.
     """
 
-    goals = load_data(BUCKET_FILE)
+    goals = load_data(GOAL_FILE)
 
     new_goal = {
         "task": goal,
@@ -81,80 +124,129 @@ def add_goal(goal):
 
     goals.append(new_goal)
 
-    save_data(BUCKET_FILE, goals)
+    save_data(GOAL_FILE, goals)
 
 
 def complete_goal(index):
     """
     Mark goal as completed.
+    Return motivational quote.
     """
 
-    goals = load_data(BUCKET_FILE)
+    goals = load_data(GOAL_FILE)
 
     goals[index]["completed"] = True
 
-    save_data(BUCKET_FILE, goals)
+    save_data(GOAL_FILE, goals)
 
-    # Return random positive quote
     return random.choice(quotes)
 
 
-# =====================================
-# STREAMLIT APP
-# =====================================
+# =====================================================
+# APP TITLE
+# =====================================================
 
-st.title("🌸 My Simple Journal App")
+st.title("🌸 My Happy Space")
+st.write("Your safe place for journaling, dreams, and motivation 💖")
 
-# =====================================
-# JOURNAL SECTION
-# =====================================
+# =====================================================
+# DAILY MOTIVATION
+# =====================================================
 
-st.header("📖 Journal")
+st.header("🌟 Daily Motivation")
 
-journal_text = st.text_area(
-    "Write your journal:"
+daily_quote = random.choice(quotes)
+
+st.info(daily_quote)
+
+# =====================================================
+# MOOD CHECK-IN
+# =====================================================
+
+st.header("💭 How Are You Feeling Today?")
+
+selected_mood = st.selectbox(
+    "Choose your mood:",
+    [
+        "😊 Happy",
+        "😴 Tired",
+        "😢 Sad",
+        "😡 Angry",
+        "😰 Stressed"
+    ]
 )
 
-if st.button("Save Journal"):
+st.success(mood_messages[selected_mood])
 
-    if journal_text != "":
-        add_journal(journal_text)
+# =====================================================
+# JOURNAL SECTION
+# =====================================================
 
-        st.success("Journal saved!")
+st.header("📖 My Journal")
 
-# Show previous journals
+journal_text = st.text_area(
+    "Write about your day 🌷"
+)
+
+if st.button("💾 Save Journal"):
+
+    if journal_text.strip() != "":
+
+        add_journal(journal_text, selected_mood)
+
+        st.success("Journal saved successfully 💖")
+
+# =====================================================
+# SHOW JOURNALS
+# =====================================================
+
 journals = load_data(JOURNAL_FILE)
 
 if journals:
 
-    st.subheader("Your Journal Entries")
+    st.subheader("🌸 Previous Journal Entries")
 
-    for entry in journals:
-        st.write("•", entry)
+    for entry in reversed(journals):
 
-# =====================================
+        st.markdown(f"""
+        💕 **Date:** {entry["date"]}
+
+        😊 **Mood:** {entry["mood"]}
+
+        ✨ {entry["text"]}
+
+        ---
+        """)
+
+# =====================================================
 # BUCKET LIST SECTION
-# =====================================
+# =====================================================
 
-st.header("🎯 Bucket List")
+st.header("🎯 My Bucket List")
 
 goal_text = st.text_input(
-    "Add a goal:"
+    "Add your dream or goal 🌈"
 )
 
-if st.button("Add Goal"):
+if st.button("➕ Add Goal"):
 
-    if goal_text != "":
+    if goal_text.strip() != "":
+
         add_goal(goal_text)
 
-        st.success("Goal added!")
+        st.success("Goal added 🌟")
 
-# Show goals
-goals = load_data(BUCKET_FILE)
+# =====================================================
+# SHOW GOALS
+# =====================================================
+
+goals = load_data(GOAL_FILE)
 
 if goals:
 
-    st.subheader("Your Goals")
+    st.subheader("💖 My Goals")
+
+    completed_count = 0
 
     for i, goal in enumerate(goals):
 
@@ -164,10 +256,47 @@ if goals:
             key=i
         )
 
-        # If checked for first time
+        if checked:
+            completed_count += 1
+
+        # First time completed
         if checked and goal["completed"] == False:
 
             quote = complete_goal(i)
 
-            st.success("Goal completed!")
+            st.balloons()
+
+            st.success("🎉 Goal completed!")
+
             st.info(quote)
+
+# =====================================================
+# PROGRESS SECTION
+# =====================================================
+
+st.header("📊 Progress Tracker")
+
+total_goals = len(goals)
+
+if total_goals > 0:
+
+    progress = completed_count / total_goals
+
+    st.progress(progress)
+
+    st.write(
+        f"✨ You completed {completed_count} out of {total_goals} goals!"
+    )
+
+else:
+    st.write("No goals yet 🌸")
+
+# =====================================================
+# CUTE FOOTER
+# =====================================================
+
+st.write("---")
+
+st.caption(
+    "🌷 Remember: You don't need to be perfect to make progress 💖"
+)
