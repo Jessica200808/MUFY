@@ -2,100 +2,144 @@ import random
 import streamlit as st
 
 # -----------------------------------------------------------------------------
-# 1. APP CONFIGURATION & PRE-MADE QUOTES
+# 1. CUTE APP THEME & DESIGN
 # -----------------------------------------------------------------------------
+# We configure the page and inject a bit of styling to make it look cozy and soft
+st.set_page_config(page_title="CozySpace | Student Oasis", page_icon="☁️", layout="centered")
 
-# Set up the title of the browser tab and page layout
-st.set_page_config(page_title="My Daily Space", page_icon="🌱")
+# Custom CSS to make buttons cute, round, and change background colors gently
+st.markdown("""
+    <style>
+    /* Main background and font styling */
+    .stApp { background-color: #FAF5F5; }
+    h1, h2, h3 { color: #6D5D6E; font-family: 'Comic Sans MS', sans-serif; }
+    
+    /* Make buttons look soft and pastel purple */
+    div.stButton > button:first-child {
+        background-color: #E3DFFD;
+        color: #463C51;
+        border-radius: 20px;
+        border: 1px solid #D1C9FF;
+        font-weight: bold;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #D1C9FF;
+        color: #463C51;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# A list of positive quotes to reward you when completing a goal
-POSITIVE_QUOTES = [
-    "“The future belongs to those who believe in the beauty of their dreams.” – Eleanor Roosevelt",
-    "“Every accomplishment starts with the decision to try.” – John F. Kennedy",
-    "“Don't count the days, make the days count.” – Muhammad Ali",
-    "“You are never too old to set another goal or to dream a new dream.” – C.S. Lewis",
-    "“Believe you can and you're halfway there.” – Theodore Roosevelt",
-    "“Cheers to a new achievement! Keep chasing what sets your soul on fire.” ✨"
+# -----------------------------------------------------------------------------
+# 2. MOTIVATIONAL DATA BANK
+# -----------------------------------------------------------------------------
+STUDENT_QUOTES = [
+    "🌸 ”You don't have to see the whole staircase, just take the first step.” — Martin Luther King Jr.",
+    "🧸 ”It always seems impossible until it's done. You're doing great!”",
+    "💫 ”Your worth is not defined by a exam grade. Breathe, you are learning and growing.”",
+    "🌱 ”Progress over perfection. A little progress each day adds up to big results.”",
+    "🧁 ”Be proud of how hard you are trying today.”"
+]
+
+STRESS_RELIEF_TIPS = [
+    "Drop your shoulders right now and unclench your jaw. Take a deep breath... Hold it... and let it out. 🌬️",
+    "Go drink a refreshing glass of water! Your brain needs hydration to stay happy. 💧",
+    "Stand up and stretch your arms up high like a lazy cat for 15 seconds. 🐈",
+    "Step away from the screen, look out the window, and find 3 blue things. Give your eyes a break! 👀",
+    "Put on your favorite song right now and just dance or hum along for 3 minutes! 🎧"
 ]
 
 # -----------------------------------------------------------------------------
-# 2. APPLICATION MEMORY (Session State)
+# 3. APP MEMORY (Session State)
 # -----------------------------------------------------------------------------
-# Streamlit re-runs the code from top to bottom every time you click something.
-# We use st.session_state so the app "remembers" your data and doesn't erase it.
-
-if "journal_entries" not in st.session_state:
-    st.session_state.journal_entries = []
-    
-if "bucket_list" not in st.session_state:
-    # Starting with two example items already in your list
-    st.session_state.bucket_list = [
-        {"task": "Learn Python", "completed": False},
-        {"task": "Build my first web app", "completed": False}
+if "journal" not in st.session_state:
+    st.session_state.journal = []
+if "goals" not in st.session_state:
+    st.session_state.goals = [
+        {"task": "📚 Complete today's revision", "done": False},
+        {"task": "💧 Drink 2 liters of water", "done": False}
     ]
 
 # -----------------------------------------------------------------------------
-# 3. MAIN APP INTERFACE
+# 4. MAIN APP INTERFACE
 # -----------------------------------------------------------------------------
 
-st.title("🌱 My Daily Space")
-st.write("Welcome! Use this space to log your thoughts and track your goals.")
+# Cute Header Banner
+st.write("# ☁️ CozySpace")
+st.write("##### *Your tiny, stress-free corner to breathe, track goals, and feel motivated.* 🍰")
+st.write("---")
 
-# Create two simple tabs at the top of the page
-tab1, tab2 = st.tabs(["📝 Journal", "🎯 Bucket List"])
+# Main Navigation Tabs
+tab1, tab2, tab3 = st.tabs(["✨ Daily Motivate & Destress", "🎯 My Goals", "📝 Vent & Reflection"])
 
-# --- TAB 1: JOURNAL ---
+# --- TAB 1: DESTRESS & MOTIVATION ---
 with tab1:
-    st.subheader("Personal Journal")
+    st.write("### 🍯 Quick Mood Booster")
+    st.write("Feeling overwhelmed with study? Let's take a tiny break.")
     
-    # 1. Input: Box for typing your entry
-    user_entry = st.text_area("What's on your mind today?", placeholder="Start writing here...", height=150)
+    # Stress Buster Button
+    if st.button("🍩 Give me a Stress-Relief Tip!"):
+        tip = random.choice(STRESS_RELIEF_TIPS)
+        st.info(f"**Self-Care Reminder:** {tip}")
+        
+    st.write("---")
+    st.write("### 🎒 Spark of Motivation")
+    # Always display a random motivational quote to start the day
+    if "current_quote" not in st.session_state:
+        st.session_state.current_quote = random.choice(STUDENT_QUOTES)
+        
+    st.success(st.session_state.current_quote)
     
-    # 2. Action: Save button
-    if st.button("Save Entry", type="primary"):
-        if user_entry.strip() != "":  # Make sure they actually typed something
-            st.session_state.journal_entries.append(user_entry)
-            st.success("Saved successfully!")
-        else:
-            st.warning("Please write something before saving.")
-            
-    # 3. Output: Display past entries if there are any
-    if st.session_state.journal_entries:
-        st.write("### Past Entries")
-        # We use reversed() so the newest entries show up at the very top
-        for entry in reversed(st.session_state.journal_entries):
-            st.info(entry)
+    if st.button("🔄 Change Quote"):
+        st.session_state.current_quote = random.choice(STUDENT_QUOTES)
+        st.rerun()
 
-
-# --- TAB 2: BUCKET LIST ---
+# --- TAB 2: CUTE BUCKET LIST / GOALS ---
 with tab2:
-    st.subheader("My Bucket List")
+    st.write("### 🐼 My Goal Tracker")
+    st.write("Break your big tasks into tiny, bite-sized goals!")
     
-    # 1. Input: Box to type a new goal
-    new_goal = st.text_input("Add a new goal:", placeholder="e.g., Skydiving, Learn to cook...")
+    # Add a new goal
+    new_goal = st.text_input("What do you want to achieve next?", placeholder="e.g., Finish math homework, Clean my desk...")
+    if st.button("✨ Add to List"):
+        if new_goal.strip():
+            st.session_state.goals.append({"task": f"⭐ {new_goal}", "done": False})
+            st.rerun()
+
+    st.write("")
+    st.write("##### Check off your victories:")
     
-    if st.button("Add to List"):
-        if new_goal.strip() != "":
-            st.session_state.bucket_list.append({"task": new_goal, "completed": False})
-            st.rerun() # Refresh the page immediately to show the new goal
-            
-    st.write("### Check off your achievements:")
-    
-    # 2. Output & Logic: Display checkboxes for each goal
-    for idx, item in enumerate(st.session_state.bucket_list):
+    # Render checkboxes
+    for idx, item in enumerate(st.session_state.goals):
+        checked = st.checkbox(item["task"], value=item["done"], key=f"goal_{idx}")
         
-        # Display the checkbox. Its checked status comes from our memory (item["completed"])
-        checked = st.checkbox(item["task"], value=item["completed"], key=f"goal_{idx}")
-        
-        # If the user clicks a checkbox that WAS NOT completed yet:
-        if checked and not item["completed"]:
-            st.session_state.bucket_list[idx]["completed"] = True
+        # When a student checks a goal off
+        if checked and not item["done"]:
+            st.session_state.goals[idx]["done"] = True
+            st.balloons() # Shoot celebration balloons!
             
-            # Pick a random quote and show a big celebration banner!
-            celebration_quote = random.choice(POSITIVE_QUOTES)
-            st.balloons() # Shoots visual balloons up the screen!
-            st.success(f"🎉 **Goal Completed!** Here is your quote:\n\n{celebration_quote}")
+            # Show a cute celebratory message
+            celebration_quote = random.choice(STUDENT_QUOTES)
+            st.success(f"🎉 **Yay! You did it!** Keep that momentum going! \n\n {celebration_quote}")
             
-        # If the user unchecks a box, mark it as incomplete again
-        elif not checked and item["completed"]:
-            st.session_state.bucket_list[idx]["completed"] = False
+        elif not checked and item["done"]:
+            st.session_state.goals[idx]["done"] = False
+
+# --- TAB 3: VENT & REFLECTION JOURNAL ---
+with tab3:
+    st.write("### 📝 Brain Dump & Vent Space")
+    st.write("Stressed out? Frustrated? Type it all out here to leave it behind, or write down things you are grateful for today.")
+    
+    entry_text = st.text_area("Dump your thoughts here...", placeholder="Nobody can see this but you. Let it all out...", height=150)
+    
+    if st.button("🔒 Lock Entry Into Diary"):
+        if entry_text.strip():
+            st.session_state.journal.append(entry_text)
+            st.toast("Saved safely! 🧸")
+            st.rerun()
+            
+    # Display diary entries down below
+    if st.session_state.journal:
+        st.write("---")
+        st.write("##### 📔 My Past Reflections")
+        for entry in reversed(st.session_state.journal):
+            st.warning(f"💭 {entry}")
