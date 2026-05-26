@@ -20,10 +20,7 @@ st.set_page_config(
 
 st.title("🌟 Student Productivity & Wellness App")
 
-st.write(
-    "A simple app to help students manage stress, "
-    "stay productive, and stay motivated."
-)
+st.write("Manage stress, goals, and motivation in one place.")
 
 
 # =====================================================
@@ -53,23 +50,33 @@ quotes = [
 
 
 # =====================================================
-# SIDEBAR (MUSIC + NAV)
+# SIDEBAR - MUSIC SECTION
 # =====================================================
 
-st.sidebar.title("🎧 Settings")
+st.sidebar.title("🎧 Focus Music")
 
-play_music = st.sidebar.checkbox("Play calming music")
+music_choice = st.sidebar.selectbox(
+    "Choose music mood",
+    ["None", "🌿 Calm", "😊 Happy", "✨ Satisfying"]
+)
 
-st.sidebar.write("Navigate using tabs below 👇")
+
+# =====================================================
+# MUSIC LINKS (SIMPLE & SAFE)
+# =====================================================
+
+music_links = {
+    "🌿 Calm": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    "😊 Happy": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    "✨ Satisfying": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+}
 
 
-# OPTIONAL MUSIC
-if play_music:
-    st.sidebar.success("Focus mode ON 🎧")
+if music_choice != "None":
 
-    st.audio(
-        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-    )
+    st.sidebar.success(f"Playing: {music_choice}")
+
+    st.audio(music_links[music_choice])
 
 
 # =====================================================
@@ -84,7 +91,7 @@ tab1, tab2, tab3 = st.tabs([
 
 
 # =====================================================
-# JOURNAL TAB
+# JOURNAL
 # =====================================================
 
 with tab1:
@@ -92,7 +99,7 @@ with tab1:
     st.header("📔 Daily Journal")
 
     mood = st.selectbox(
-        "How are you feeling?",
+        "Mood",
         ["😊 Happy", "😐 Okay", "😔 Sad", "😡 Angry", "😵 Stressed"]
     )
 
@@ -108,11 +115,11 @@ with tab1:
                 "text": text
             })
 
-            st.success("Journal saved!")
+            st.success("Saved!")
             st.balloons()
 
         else:
-            st.warning("Please write something first")
+            st.warning("Write something first")
 
 
     st.divider()
@@ -121,13 +128,13 @@ with tab1:
 
     for j in reversed(st.session_state.journals):
 
-        st.markdown(f"**{j['mood']} | {j['date']}**")
+        st.write(f"**{j['mood']} | {j['date']}**")
         st.write(j["text"])
         st.divider()
 
 
 # =====================================================
-# BUCKET LIST TAB
+# BUCKET LIST
 # =====================================================
 
 with tab2:
@@ -170,17 +177,15 @@ with tab2:
 
 
 # =====================================================
-# MOTIVATION TAB
+# MOTIVATION
 # =====================================================
 
 with tab3:
 
-    st.header("✨ Daily Motivation")
-
-    st.write("Click to get motivation")
+    st.header("✨ Motivation")
 
     if st.button("Generate Quote"):
 
         st.success(random.choice(quotes))
 
-    st.info("Take care of your mental health. You matter 💙")
+    st.info("Take care of your mental health 💙")
