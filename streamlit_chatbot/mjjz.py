@@ -1,13 +1,70 @@
+# ============================================
+# LIFE COMPANION APP
+# Python + Streamlit
+#
+# Features:
+# 1. Journal
+# 2. Bucket List
+# 3. Positive Quotes
+# 4. AI Support Chat
+#
+# HOW TO RUN:
+#
+# 1. Install libraries:
+#    pip install streamlit openai
+#
+# 2. Create folders/files:
+#
+#    life_app/
+#    ├── app.py
+#    └── data/
+#         ├── journal.json
+#         └── bucket_list.json
+#
+# 3. Put [] inside both json files
+#
+# 4. Run:
+#    streamlit run app.py
+#
+# ============================================
+
+
+# ============================================
+# IMPORTS
+# ============================================
+
 import streamlit as st
 import json
 import random
 from datetime import datetime
 from openai import OpenAI
+
+
+# ============================================
+# OPENAI API KEY
+# ============================================
+
+# Replace with your own API key
+# Get API key from:
+# https://platform.openai.com/
+
 client = OpenAI(
     api_key="YOUR_API_KEY_HERE"
 )
+
+
+# ============================================
+# FILE PATHS
+# ============================================
+
 JOURNAL_FILE = "data/journal.json"
 BUCKET_FILE = "data/bucket_list.json"
+
+
+# ============================================
+# LOAD DATA FUNCTION
+# ============================================
+
 def load_data(file_path):
     """
     Load data from JSON file.
@@ -19,6 +76,12 @@ def load_data(file_path):
 
     except:
         return []
+
+
+# ============================================
+# SAVE DATA FUNCTION
+# ============================================
+
 def save_data(file_path, data):
     """
     Save data into JSON file.
@@ -26,6 +89,12 @@ def save_data(file_path, data):
 
     with open(file_path, "w") as file:
         json.dump(data, file, indent=4)
+
+
+# ============================================
+# RANDOM POSITIVE QUOTE
+# ============================================
+
 def get_positive_quote():
     """
     Return random motivational quote.
@@ -51,6 +120,12 @@ def get_positive_quote():
     ]
 
     return random.choice(quotes)
+
+
+# ============================================
+# AI CHAT FUNCTION
+# ============================================
+
 def ask_ai(user_message):
     """
     Send user message to AI.
