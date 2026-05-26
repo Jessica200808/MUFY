@@ -32,8 +32,8 @@ selected_month = st.sidebar.selectbox(
     options = df['Month'].unique()
 )
 price_range = st.sidebar.slider(
-    "Select Price Range"
-    min_value = 0
-    max_value = 3000
+    "Select Price Range",
+    min_value = 0,
+    max_value = 3000,
     value = (0, 3000)
 )
