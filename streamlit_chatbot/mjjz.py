@@ -1,19 +1,19 @@
 # ============================================
-# LIFE COMPANION APP
+# LIFE COMPANION APP (NO AI VERSION)
 # Python + Streamlit
 #
-# Features:
+# FEATURES:
 # 1. Journal
 # 2. Bucket List
 # 3. Positive Quotes
-# 4. AI Support Chat
 #
-# HOW TO RUN:
+# ============================================
+# HOW TO RUN
 #
-# 1. Install libraries:
-#    pip install streamlit openai
+# 1. Install Streamlit:
+#    pip install streamlit
 #
-# 2. Create folders/files:
+# 2. Create this folder structure:
 #
 #    life_app/
 #    ├── app.py
@@ -21,9 +21,9 @@
 #         ├── journal.json
 #         └── bucket_list.json
 #
-# 3. Put [] inside both json files
+# 3. Put [] inside BOTH json files
 #
-# 4. Run:
+# 4. Run app:
 #    streamlit run app.py
 #
 # ============================================
@@ -37,20 +37,6 @@ import streamlit as st
 import json
 import random
 from datetime import datetime
-from openai import OpenAI
-
-
-# ============================================
-# OPENAI API KEY
-# ============================================
-
-# Replace with your own API key
-# Get API key from:
-# https://platform.openai.com/
-
-client = OpenAI(
-    api_key="YOUR_API_KEY_HERE"
-)
 
 
 # ============================================
@@ -58,6 +44,7 @@ client = OpenAI(
 # ============================================
 
 JOURNAL_FILE = "data/journal.json"
+
 BUCKET_FILE = "data/bucket_list.json"
 
 
@@ -71,10 +58,13 @@ def load_data(file_path):
     """
 
     try:
+
         with open(file_path, "r") as file:
+
             return json.load(file)
 
     except:
+
         return []
 
 
@@ -88,11 +78,12 @@ def save_data(file_path, data):
     """
 
     with open(file_path, "w") as file:
+
         json.dump(data, file, indent=4)
 
 
 # ============================================
-# RANDOM POSITIVE QUOTE
+# POSITIVE QUOTES FUNCTION
 # ============================================
 
 def get_positive_quote():
@@ -108,57 +99,18 @@ def get_positive_quote():
 
         "Believe in yourself.",
 
-        "You can do hard things.",
-
-        "Every day is a new beginning.",
+        "Every day is a fresh start.",
 
         "Your future self will thank you.",
 
+        "You can do hard things.",
+
         "Keep going. You are improving.",
 
-        "Success starts with consistency."
+        "Success begins with consistency."
     ]
 
     return random.choice(quotes)
-
-
-# ============================================
-# AI CHAT FUNCTION
-# ============================================
-
-def ask_ai(user_message):
-    """
-    Send user message to AI.
-    """
-
-    try:
-
-        response = client.chat.completions.create(
-
-            model="gpt-4.1-mini",
-
-            messages=[
-
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a kind and supportive AI friend. "
-                        "Help users with motivation, emotional support, "
-                        "stress, productivity, and encouragement."
-                    )
-                },
-
-                {
-                    "role": "user",
-                    "content": user_message
-                }
-            ]
-        )
-
-        return response.choices[0].message.content
-
-    except Exception as e:
-        return f"Error: {e}"
 
 
 # ============================================
@@ -166,8 +118,11 @@ def ask_ai(user_message):
 # ============================================
 
 st.set_page_config(
+
     page_title="Life Companion App",
+
     page_icon="🌟",
+
     layout="centered"
 )
 
@@ -179,36 +134,35 @@ st.set_page_config(
 st.title("🌟 Life Companion App")
 
 st.write(
-    "Journal your thoughts, complete goals, "
-    "and talk to AI for support."
+    "Write your journal, track your goals, "
+    "and stay motivated."
 )
 
 
 # ============================================
-# TABS
+# CREATE TABS
 # ============================================
 
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2 = st.tabs([
     "📔 Journal",
-    "🎯 Bucket List",
-    "🤖 AI Support"
+    "🎯 Bucket List"
 ])
 
 
-# =====================================================
+# ====================================================
 # JOURNAL TAB
-# =====================================================
+# ====================================================
 
 with tab1:
 
     st.header("Daily Journal")
 
-    # User writes journal
+    # Journal input
     journal_text = st.text_area(
         "Write about your day"
     )
 
-    # User mood
+    # Mood selection
     mood = st.selectbox(
         "Choose your mood",
         [
@@ -222,10 +176,10 @@ with tab1:
     # Save button
     if st.button("Save Journal"):
 
-        # Load old entries
+        # Load old journal entries
         journal_entries = load_data(JOURNAL_FILE)
 
-        # Add new entry
+        # Add new journal entry
         journal_entries.append({
 
             "date": str(datetime.now()),
@@ -235,18 +189,21 @@ with tab1:
             "text": journal_text
         })
 
-        # Save back to file
+        # Save updated entries
         save_data(JOURNAL_FILE, journal_entries)
 
-        st.success("Journal saved!")
+        st.success("Journal saved successfully!")
 
 
-    # Show previous journal entries
+    # ============================================
+    # SHOW PREVIOUS ENTRIES
+    # ============================================
+
     st.subheader("Previous Entries")
 
     journal_entries = load_data(JOURNAL_FILE)
 
-    # Show newest first
+    # Show newest entries first
     for entry in reversed(journal_entries):
 
         st.markdown(f"### 📅 {entry['date']}")
@@ -258,15 +215,15 @@ with tab1:
         st.divider()
 
 
-# =====================================================
+# ====================================================
 # BUCKET LIST TAB
-# =====================================================
+# ====================================================
 
 with tab2:
 
     st.header("Bucket List")
 
-    # Input new goal
+    # Goal input
     new_goal = st.text_input(
         "Enter a new goal"
     )
@@ -276,6 +233,7 @@ with tab2:
 
         goals = load_data(BUCKET_FILE)
 
+        # Add new goal
         goals.append({
 
             "goal": new_goal,
@@ -283,12 +241,16 @@ with tab2:
             "completed": False
         })
 
+        # Save goals
         save_data(BUCKET_FILE, goals)
 
         st.success("Goal added!")
 
 
-    # Show goals
+    # ============================================
+    # SHOW GOALS
+    # ============================================
+
     st.subheader("Your Goals")
 
     goals = load_data(BUCKET_FILE)
@@ -305,7 +267,7 @@ with tab2:
             key=i
         )
 
-        # If newly completed
+        # If user completes goal
         if completed and not goal["completed"]:
 
             st.balloons()
@@ -316,43 +278,9 @@ with tab2:
                 f"🎉 Goal completed!\n\n✨ {quote}"
             )
 
-        # Update completion status
+        # Update completed status
         goals[i]["completed"] = completed
+
 
     # Save updated goals
     save_data(BUCKET_FILE, goals)
-
-
-# =====================================================
-# AI SUPPORT TAB
-# =====================================================
-
-with tab3:
-
-    st.header("Talk to AI")
-
-    st.write(
-        "Share your problems or feelings."
-    )
-
-    # User message
-    user_problem = st.text_area(
-        "What do you want help with?"
-    )
-
-    # AI button
-    if st.button("Ask AI"):
-
-        if user_problem.strip() != "":
-
-            with st.spinner("AI is thinking..."):
-
-                ai_response = ask_ai(user_problem)
-
-            st.markdown("### 🤖 AI Response")
-
-            st.write(ai_response)
-
-        else:
-
-            st.warning("Please type something.")
