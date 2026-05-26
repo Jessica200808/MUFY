@@ -3,57 +3,20 @@ import random
 from datetime import datetime
 
 
-# =========================================
-# PAGE SETTINGS
-# =========================================
+# =====================================================
+# PAGE SETUP
+# =====================================================
 
 st.set_page_config(
-    page_title="Life Companion",
+    page_title="Life Companion Pro",
     page_icon="🌟",
-    layout="centered"
+    layout="wide"
 )
 
 
-# =========================================
-# CUSTOM CSS
-# =========================================
-
-st.markdown("""
-<style>
-
-.main {
-    background-color: #0f172a;
-    color: white;
-}
-
-h1, h2, h3 {
-    color: #f8fafc;
-}
-
-.stButton button {
-    background-color: #8b5cf6;
-    color: white;
-    border-radius: 10px;
-    border: none;
-    padding: 10px;
-    font-weight: bold;
-}
-
-.stTextArea textarea {
-    border-radius: 10px;
-}
-
-.stTextInput input {
-    border-radius: 10px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# =========================================
-# SESSION STORAGE
-# =========================================
+# =====================================================
+# SESSION STATE INIT
+# =====================================================
 
 if "journals" not in st.session_state:
     st.session_state.journals = []
@@ -62,215 +25,174 @@ if "goals" not in st.session_state:
     st.session_state.goals = []
 
 
-# =========================================
-# POSITIVE QUOTES
-# =========================================
+# =====================================================
+# MOTIVATIONAL QUOTES
+# =====================================================
 
-quotes = [
-
-    "You are capable of amazing things.",
-
-    "Small progress is still progress.",
-
-    "Believe in yourself.",
-
-    "Your future is bright.",
-
-    "Every day is a second chance.",
-
-    "You can do difficult things.",
-
-    "Keep showing up for yourself.",
-
-    "Growth takes time."
+QUOTES = [
+    "You are doing better than you think.",
+    "Small steps every day lead to big results.",
+    "Believe in your ability to grow.",
+    "Consistency beats motivation.",
+    "You can restart anytime.",
+    "Progress, not perfection.",
+    "Your future self will thank you."
 ]
 
 
-# =========================================
-# SIDEBAR
-# =========================================
+# =====================================================
+# SIDEBAR NAVIGATION
+# =====================================================
 
-st.sidebar.title("🌟 Navigation")
+st.sidebar.title("🌟 Life Companion Pro")
 
 page = st.sidebar.radio(
-
-    "Go to:",
-
-    [
-        "🏠 Home",
-        "📔 Journal",
-        "🎯 Bucket List",
-        "✨ Motivation"
-    ]
+    "Navigate",
+    ["🏠 Dashboard", "📔 Journal", "🎯 Bucket List", "✨ Motivation"]
 )
 
 
-# =========================================
-# HOME PAGE
-# =========================================
+# =====================================================
+# DASHBOARD
+# =====================================================
 
-if page == "🏠 Home":
+if page == "🏠 Dashboard":
 
-    st.title("🌟 Life Companion")
+    st.title("🌟 Dashboard")
 
-    st.write(
-        "A self-care app to help you track goals, "
-        "write journals, and stay motivated."
-    )
+    st.write("Your personal growth overview")
 
-    st.image(
-        "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-        use_container_width=True
-    )
+    col1, col2 = st.columns(2)
 
-    st.subheader("📊 Your Progress")
+    with col1:
+        st.metric("📔 Journals", len(st.session_state.journals))
 
-    total_goals = len(st.session_state.goals)
+    with col2:
+        completed = sum(1 for g in st.session_state.goals if g["done"])
+        st.metric("🎯 Completed Goals", completed)
 
-    completed_goals = 0
+    st.divider()
 
-    for goal in st.session_state.goals:
+    st.subheader("📊 Progress")
 
-        if goal["completed"]:
-            completed_goals += 1
+    total = len(st.session_state.goals)
 
-    # Prevent division error
-    if total_goals > 0:
-
-        progress = completed_goals / total_goals
-
+    if total == 0:
+        st.info("Add goals to see progress")
+    else:
+        progress = completed / total
         st.progress(progress)
 
-        st.write(
-            f"{completed_goals} out of "
-            f"{total_goals} goals completed"
-        )
-
-    else:
-        st.write("No goals added yet.")
+        st.write(f"{completed}/{total} goals completed")
 
 
-# =========================================
+# =====================================================
 # JOURNAL PAGE
-# =========================================
+# =====================================================
 
 elif page == "📔 Journal":
 
-    st.title("📔 Daily Journal")
+    st.title("📔 Journal")
 
-    mood = st.select_slider(
-
-        "How are you feeling today?",
-
-        options=[
-            "😔",
-            "😐",
-            "😊",
-            "😁"
-        ]
+    mood = st.selectbox(
+        "Mood",
+        ["😊 Happy", "😐 Neutral", "😔 Sad", "😡 Angry", "🤯 Stressed"]
     )
 
-    journal_text = st.text_area(
-        "Write your thoughts"
-    )
+    text = st.text_area("Write your thoughts")
 
     if st.button("Save Journal"):
 
-        st.session_state.journals.append({
+        if text.strip():
 
-            "date": str(datetime.now()),
+            st.session_state.journals.append({
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "mood": mood,
+                "text": text
+            })
 
-            "mood": mood,
+            st.success("Saved!")
+        else:
+            st.warning("Write something first")
 
-            "text": journal_text
-        })
+    st.divider()
 
-        st.success("Journal saved successfully!")
+    st.subheader("Previous Entries")
 
+    for j in reversed(st.session_state.journals):
 
-    st.subheader("📚 Previous Entries")
-
-    for entry in reversed(st.session_state.journals):
-
-        st.markdown(
-            f"### {entry['mood']} {entry['date']}"
-        )
-
-        st.write(entry["text"])
-
-        st.divider()
+        with st.container():
+            st.write(f"**{j['mood']} | {j['date']}**")
+            st.write(j["text"])
+            st.divider()
 
 
-# =========================================
+# =====================================================
 # BUCKET LIST PAGE
-# =========================================
+# =====================================================
 
 elif page == "🎯 Bucket List":
 
     st.title("🎯 Bucket List")
 
-    new_goal = st.text_input(
-        "Add a new goal"
-    )
+    new_goal = st.text_input("Add a new goal")
 
     if st.button("Add Goal"):
 
-        st.session_state.goals.append({
+        if new_goal.strip():
 
-            "goal": new_goal,
+            st.session_state.goals.append({
+                "goal": new_goal,
+                "done": False
+            })
 
-            "completed": False
-        })
+            st.success("Goal added!")
+        else:
+            st.warning("Type a goal first")
 
-        st.success("Goal added!")
-
+    st.divider()
 
     st.subheader("Your Goals")
 
-    for i, goal in enumerate(st.session_state.goals):
+    for i, g in enumerate(st.session_state.goals):
 
-        checked = st.checkbox(
+        col1, col2 = st.columns([0.8, 0.2])
 
-            goal["goal"],
+        with col1:
+            done = st.checkbox(g["goal"], value=g["done"], key=i)
 
-            value=goal["completed"],
+        with col2:
+            if done and not g["done"]:
+                st.balloons()
+                st.success(random.choice(QUOTES))
 
-            key=i
-        )
-
-        # Goal completed
-        if checked and not goal["completed"]:
-
-            st.balloons()
-
-            quote = random.choice(quotes)
-
-            st.success(
-                f"🎉 Goal completed!\n\n✨ {quote}"
-            )
-
-        st.session_state.goals[i]["completed"] = checked
+        st.session_state.goals[i]["done"] = done
 
 
-# =========================================
+# =====================================================
 # MOTIVATION PAGE
-# =========================================
+# =====================================================
 
 elif page == "✨ Motivation":
 
     st.title("✨ Daily Motivation")
 
-    st.write(
-        "Click the button for a positive quote."
-    )
+    st.write("Get a boost of positivity")
 
     if st.button("Generate Quote"):
 
-        quote = random.choice(quotes)
+        st.success(random.choice(QUOTES))
 
-        st.success(f"💜 {quote}")
+    st.divider()
 
-    st.image(
-        "https://images.unsplash.com/photo-1490750967868-88aa4486c946",
-        use_container_width=True
-    )
+    st.subheader("💡 Tip of the Day")
+
+    tips = [
+        "Drink water regularly",
+        "Write your thoughts daily",
+        "Take short breaks",
+        "Focus on one task at a time",
+        "Sleep at consistent times"
+    ]
+
+    st.info(random.choice(tips))
