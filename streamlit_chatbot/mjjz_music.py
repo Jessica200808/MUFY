@@ -188,4 +188,4 @@ with tab3:
 
         st.success(random.choice(quotes))
 
-    st.info("Take care of your mental health 💙")
+    st.info("Take care of your mental health 💙") 
