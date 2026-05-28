@@ -15,20 +15,57 @@ st.set_page_config(
 
 
 # =====================================================
-# SIMPLE USER ACCOUNT
+# SESSION STATE
 # =====================================================
 
-# Example account
-USERNAME = "student"
-PASSWORD = "1234"
-
-
-# =====================================================
-# LOGIN SESSION
-# =====================================================
+if "users" not in st.session_state:
+    st.session_state.users = {}
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+
+if "current_user" not in st.session_state:
+    st.session_state.current_user = ""
+
+if "journals" not in st.session_state:
+    st.session_state.journals = []
+
+if "goals" not in st.session_state:
+    st.session_state.goals = []
+
+
+# =====================================================
+# SIGN UP FUNCTION
+# =====================================================
+
+def signup():
+
+    st.subheader("📝 Create Account")
+
+    new_username = st.text_input(
+        "Create Username"
+    )
+
+    new_password = st.text_input(
+        "Create Password",
+        type="password"
+    )
+
+    if st.button("Sign Up"):
+
+        if new_username in st.session_state.users:
+
+            st.error("Username already exists")
+
+        elif new_username == "" or new_password == "":
+
+            st.warning("Please fill all fields")
+
+        else:
+
+            st.session_state.users[new_username] = new_password
+
+            st.success("Account created successfully!")
 
 
 # =====================================================
@@ -37,7 +74,7 @@ if "logged_in" not in st.session_state:
 
 def login():
 
-    st.title("🔐 Login System")
+    st.subheader("🔐 Login")
 
     username = st.text_input("Username")
 
@@ -48,9 +85,15 @@ def login():
 
     if st.button("Login"):
 
-        if username == USERNAME and password == PASSWORD:
+        if (
+            username in st.session_state.users
+            and
+            st.session_state.users[username] == password
+        ):
 
             st.session_state.logged_in = True
+
+            st.session_state.current_user = username
 
             st.success("Login successful!")
 
@@ -58,16 +101,27 @@ def login():
 
         else:
 
-            st.error("Wrong username or password")
+            st.error("Invalid username or password")
 
 
 # =====================================================
-# IF NOT LOGGED IN
+# AUTHENTICATION PAGE
 # =====================================================
 
 if not st.session_state.logged_in:
 
-    login()
+    st.title("🌟 Student Wellness App")
+
+    option = st.selectbox(
+        "Choose Option",
+        ["Login", "Sign Up"]
+    )
+
+    if option == "Login":
+        login()
+
+    else:
+        signup()
 
     st.stop()
 
@@ -76,11 +130,15 @@ if not st.session_state.logged_in:
 # LOGOUT BUTTON
 # =====================================================
 
-st.sidebar.success("Logged in")
+st.sidebar.success(
+    f"Logged in as {st.session_state.current_user}"
+)
 
 if st.sidebar.button("Logout"):
 
     st.session_state.logged_in = False
+
+    st.session_state.current_user = ""
 
     st.rerun()
 
@@ -92,20 +150,9 @@ if st.sidebar.button("Logout"):
 st.title("🌟 Student Productivity & Wellness App")
 
 st.write(
-    "Helping students manage stress, goals, "
+    "Helping students manage stress, productivity, "
     "and motivation."
 )
-
-
-# =====================================================
-# SESSION STORAGE
-# =====================================================
-
-if "journals" not in st.session_state:
-    st.session_state.journals = []
-
-if "goals" not in st.session_state:
-    st.session_state.goals = []
 
 
 # =====================================================
@@ -116,15 +163,15 @@ quotes = [
 
     "You are stronger than you think.",
 
-    "Small progress still matters.",
+    "Keep going, you are improving.",
 
     "Believe in yourself.",
 
-    "Keep going.",
+    "Small progress still matters.",
 
-    "Your future is bright.",
+    "You can do difficult things.",
 
-    "You can do difficult things."
+    "Stay consistent and positive."
 ]
 
 
@@ -136,7 +183,7 @@ st.sidebar.title("🎧 Music")
 
 music_choice = st.sidebar.selectbox(
 
-    "Choose music",
+    "Choose Music",
 
     [
         "None",
@@ -172,11 +219,8 @@ if music_choice != "None":
 # =====================================================
 
 tab1, tab2, tab3 = st.tabs([
-
     "📔 Journal",
-
     "🎯 Bucket List",
-
     "✨ Motivation"
 ])
 
@@ -187,7 +231,7 @@ tab1, tab2, tab3 = st.tabs([
 
 with tab1:
 
-    st.header("📔 Journal")
+    st.header("📔 Daily Journal")
 
     mood = st.selectbox(
 
@@ -211,6 +255,8 @@ with tab1:
 
             st.session_state.journals.append({
 
+                "user": st.session_state.current_user,
+
                 "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
 
                 "mood": mood,
@@ -229,11 +275,13 @@ with tab1:
 
     for j in reversed(st.session_state.journals):
 
-        st.write(f"**{j['mood']} | {j['date']}**")
+        if j["user"] == st.session_state.current_user:
 
-        st.write(j["text"])
+            st.write(f"**{j['mood']} | {j['date']}**")
 
-        st.divider()
+            st.write(j["text"])
+
+            st.divider()
 
 
 # =====================================================
@@ -253,6 +301,8 @@ with tab2:
 
             st.session_state.goals.append({
 
+                "user": st.session_state.current_user,
+
                 "goal": goal,
 
                 "done": False
@@ -270,22 +320,24 @@ with tab2:
 
     for i, g in enumerate(st.session_state.goals):
 
-        checked = st.checkbox(
+        if g["user"] == st.session_state.current_user:
 
-            g["goal"],
+            checked = st.checkbox(
 
-            value=g["done"],
+                g["goal"],
 
-            key=i
-        )
+                value=g["done"],
 
-        if checked and not g["done"]:
+                key=i
+            )
 
-            st.balloons()
+            if checked and not g["done"]:
 
-            st.success(random.choice(quotes))
+                st.balloons()
 
-        st.session_state.goals[i]["done"] = checked
+                st.success(random.choice(quotes))
+
+            st.session_state.goals[i]["done"] = checked
 
 
 # =====================================================
